@@ -1,11 +1,10 @@
 package com.ag777.converter.module;
 
 import java.util.Iterator;
-
+import com.ag777.util.lang.Formatter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.ag777.converter.utils.StringUtils;
 
 public class DataTableModuleImpl implements DataTableModuleFactory{
 
@@ -159,7 +158,7 @@ public class DataTableModuleImpl implements DataTableModuleFactory{
 	}
 	
 	private static String getResult(StringBuilder sb) {	//处理并获取最终字符串
-		String result = StringUtils.Json.formatJson(sb.toString());
+		String result = Formatter.formatJson(sb.toString(), "    ");
 		//result = result.replaceAll(regex, replacement);	//function()间的 \n去除,暂时没方法,正则只能匹配到之间的所有字符
 		return result;
 	}

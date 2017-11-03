@@ -5,10 +5,15 @@ import java.awt.Component;
 import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -24,27 +29,36 @@ import com.ag777.converter.utils.BorderLayoutHelper;
 import com.ag777.converter.utils.ClipboardUtils;
 import com.ag777.converter.utils.DialogUtils;
 import com.ag777.converter.utils.GridBagLayoutHelper;
-import com.ag777.converter.utils.StringUtils;
 import com.ag777.converter.utils.bean.RegexRule;
 import com.ag777.converter.view.interf.JfinalDbBuilderView;
+import com.ag777.util.file.FileUtils;
+import com.ag777.util.lang.StringUtils;
 
 public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderView{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8164616182191960801L;
 
 	private JFinalDBPresenter mPresenter;
 	
 	private JButton btn_start;
+	private JButton btn_toFile;
 	private JTextField tf_ip;
 	private JTextField tf_port;
 	private JTextField tf_dbName;
 	private JTextField tf_userName;
 	private JTextField tf_pwd;
 	private JTextField tf_clazzName;
-	private JComboBox cb_tableName;
+	private JComboBox<String> cb_tableName;
+	private JComboBox<String> cb_modelName;
 	private JTextArea ta_output;
 	
 	@Override
 	public void initView() {
 		btn_start = new JButton("开始构建");
+		btn_toFile = new JButton("保存到文件");
 		tf_ip = new JTextField();
 		tf_port = new JTextField();
 		tf_dbName = new JTextField();
@@ -53,7 +67,10 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 		
 		tf_clazzName = new JTextField();
 		
-		cb_tableName = new JComboBox();
+		cb_modelName = new JComboBox<>();
+		  
+		
+		cb_tableName = new JComboBox<>();
 		
 		ta_output = new JTextArea();
 		
@@ -65,8 +82,10 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 
 		
 		GridBagLayoutHelper.newInstance(panel_btn_group)
-			.addcomponent(btn_start, 0, 0);
+			.addcomponent(btn_start, 0, 0)
+			.addcomponent(btn_toFile, 0, 1);
 		btn_start.setEnabled(false);
+		btn_toFile.setEnabled(false);
 		
 		//输入框组
 		JPanel panel_top = new JPanel();
@@ -108,6 +127,11 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 				.addComponent(new JLabel("类名: "), BorderLayout.WEST)
 				.addComponent(tf_clazzName, BorderLayout.CENTER);
 			
+			JPanel panel_modelName = new JPanel();
+			BorderLayoutHelper.newInstance(panel_modelName)
+				.addComponent(new JLabel("模板: "), BorderLayout.WEST)
+				.addComponent(cb_modelName, BorderLayout.CENTER);
+			
 //		panel_top.add(panel_ip);
 //		panel_top.add(panel_port);
 //		panel_top.add(panel_dbName);
@@ -118,7 +142,8 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 			.addcomponent(panel_userName, 3, 0)
 			.addcomponent(panel_pwd, 4, 0)
 			.addcomponent(panel_clazzName, 5, 0)
-			.addcomponent(panel_tableName, 6, 0);
+			.addcomponent(panel_modelName, 6, 0)
+			.addcomponent(panel_tableName, 7, 0);
 		
 		fillDefault();	//往输入框组填入一些默认值
 		
@@ -154,25 +179,88 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
 				String clazzName = tf_clazzName.getText().trim();
 				if(!clazzName.isEmpty()) {
 					String tableName = cb_tableName.getSelectedItem().toString();
-					clazzName = StringUtils.upperCase(clazzName);	//首字母大写
-					mPresenter.build(tableName, clazzName);
+					String modelName = cb_modelName.getSelectedItem().toString();
+					clazzName = StringUtils.upperCaseFirst(clazzName);	//首字母大写
+					
+					
+					if("other".equals(modelName)) {
+//						JFileChooser jfc = new JFileChooser(new File("F:\\temp\\临时"));
+						JFileChooser jfc = new JFileChooser();
+						jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+						jfc.showDialog(new JLabel(), "选择");
+						
+						File modelFile=jfc.getSelectedFile();    
+						if(modelFile == null) {
+							return;
+						}
+						mPresenter.build(tableName, clazzName, modelFile);
+					} else {
+						mPresenter.build(tableName, clazzName, getClass().getClassLoader().getResourceAsStream(modelName+".txt"));
+					}
+					
+					
 				} else {
 					DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "【类名不能为空】", "系统提示");
 				}
 				
 			}
 		});
+		
+		btn_toFile.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String clazzName = tf_clazzName.getText().trim();
+				if(!clazzName.isEmpty()) {
+					clazzName = StringUtils.upperCaseFirst(clazzName);	//首字母大写
+					JFileChooser jfc = new JFileChooser(new File("F:\\temp\\临时"));
+					jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					jfc.showDialog(new JLabel(), "保存路径");
+					
+					File saveFile=jfc.getSelectedFile();    
+					if(saveFile == null) {
+						return;
+					}
+					try {
+						String savePath = StringUtils.concat(saveFile.getPath(),File.separator,clazzName,".java");
+						FileUtils.write(savePath, ta_output.getText(), null, true);
+						DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "保存成功", "系统提示");
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "未知异常", "系统提示");
+					}
+				} else {
+					DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "【类名不能为空】", "系统提示");
+				}
+				
+			}
+		});
+		
+		cb_tableName.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange() == ItemEvent.SELECTED){  
+					String item = (String) e.getItem();
+					tf_clazzName.setText(StringUtils.underline2Camel(item, false));
+					cb_tableName.updateUI();	//不加这句点击完会有残像
+				}
+				
+			}
+		});
+		
 	}
-
 	
 	@Override
 	public void showResult(String output) {
 		ta_output.setText(output);
 		ClipboardUtils.setClipbordContents(output);
 		DialogUtils.showMsgDialog(this, "已经复制到剪贴板", "系统提示"); 
+		btn_toFile.setEnabled(true);
 	}
 	
 	@Override
@@ -190,6 +278,9 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 		tf_dbName.setText("");
 		tf_userName.setText("root");
 		tf_pwd.setText("");
+		
+		cb_modelName.addItem("model_jfinal_sepcial");
+		cb_modelName.addItem("other");
 	}
 	
 	private void initValidate() {
@@ -225,6 +316,7 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 				for (String tableName : tableNameList) {
 					cb_tableName.addItem(tableName);
 				}
+				
 				btn_start.setEnabled(true);
 			} else {
 				System.out.println("连接失败");
@@ -257,6 +349,5 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 			}
 		});
 	}
-	
 	
 }

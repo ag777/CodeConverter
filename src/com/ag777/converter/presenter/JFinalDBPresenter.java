@@ -1,25 +1,28 @@
 package com.ag777.converter.presenter;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.List;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.ag777.converter.base.BasePresenter;
-import com.ag777.converter.module.DBModuleFactory;
-import com.ag777.converter.module.DBModuleImpl;
-import com.ag777.converter.utils.StringUtils;
+import com.ag777.converter.utils.lang.IOUtils;
 import com.ag777.converter.view.interf.JfinalDbBuilderView;
+import com.ag777.util.db.DbHelper;
+import com.ag777.util.db.model.ColumnPojo;
+import com.ag777.util.lang.StringUtils;
+import com.ag777.util.lang.collection.ListUtils;
+import com.ag777.util.lang.reflection.ReflectionUtils;
 
 
 public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 
-	private DBModuleFactory mDb;
-	private Connection conn;
+	private DbHelper helper;
 	
 	public JFinalDBPresenter() {
-		mDb = DBModuleImpl.getInstance();
 		init();
 	}
 	
@@ -31,20 +34,26 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 	@Override
 	public void detachView() {
 		super.detachView();
-		mDb.closeDb(conn);	//关闭数据库连接
+		helper.dispose();	//关闭数据库连接
 	}
 	
 	private void init() {
-		conn = null;
+		helper = null;
 	}
 	
 	public boolean init(String ip, String port, String dbName,
 			String userName, String pwd) {
-		Connection conn = mDb.connect(ip, port, dbName, userName, pwd);
-		if(conn != null) {
-			init();
-			this.conn = conn;
-			return true;
+		try {
+			DbHelper helper = DbHelper.connectDB(ip, StringUtils.toInteger(port), dbName, userName, pwd);
+			if(helper != null) {
+				init();
+				this.helper = helper;
+				return true;
+			}
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -53,24 +62,7 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 	 * 获取所有表名,先执行init(...)方法来连接数据库
 	 */
 	public List<String> getTbaleList() {
-		
-		try {
-			DatabaseMetaData dbmd = conn.getMetaData();
-			List<String> tableNames = new ArrayList<String>();
-	        ResultSet rs = null;
-	        String[] typeList = new String[] { "TABLE" };
-	        rs = dbmd.getTables(null, "%", "%",  typeList);
-	        for (boolean more = rs.next(); more; more = rs.next()) {
-	            String s = rs.getString("TABLE_NAME");
-	            String type = rs.getString("TABLE_TYPE");
-	            if (type.equalsIgnoreCase("table") && s.indexOf("$") == -1)
-	            	tableNames.add(s);
-	        }
-	        return tableNames;
-		} catch(Exception ex) {
-			mDb.closeDb(conn);
-		}
-		return new ArrayList<String>();
+		return helper.tableList();
 	}
 	
 	/**
@@ -78,144 +70,139 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 	 * @param tableName
 	 * @param className
 	 */
-	public void build(String tableName, String className) {
-		List<Col> cols = getColumns(tableName);
-		String result = getJFinalBeanString(cols, className);
-		getView().showResult(result);
+	public void build(String tableName, String className, File modelFile) {
+		try {
+			build(tableName, className, new FileInputStream(modelFile));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			getView().showResult("读取文件异常!");
+			return;
+		}
+	}
+	
+	public void build(String tableName, String className, InputStream inpuStream) {
+		try {
+			List<String> lines = IOUtils.readLines(inpuStream, "UTF-8");
+			
+			String whole = replaceWhole(tableName, className, lines);
+			String result = replaceItem(tableName, whole);
+			
+			getView().showResult(result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			getView().showResult("读取文件异常!");
+			return;
+		}
 	}
 	
 	/**
-	 * 根据字段及类型生成代码
-	 * @param list
+	 * 替换#{xxx}
+	 * @param tableName
 	 * @param className
+	 * @param modelLines
 	 * @return
 	 */
-	private static String getJFinalBeanString(List<Col> list, String className) {
+	private String replaceWhole(String tableName, String className, List<String> modelLines) {
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("public class ")
-			.append(className)
-			.append(" extends com.jfinal.plugin.activerecord.Model<")
-			.append(className)
-			.append("> {\n")
-			.append('\n');
+		Pattern p = Pattern.compile("#\\{(.+?)\\}");
+		String keys = null;
 		
-		for (Col col : list) {
-			String upperName = StringUtils.upperCase(StringUtils.underline2Camel(col.getName(),true));
+		for (String line : modelLines) {
+			int begin = 0;
+			Matcher m = p.matcher(line);
+			while(m.find()) {
+				sb.append(line.substring(begin,m.start()));
+				
+				String temp = m.group(1);	//tableName
+				if("tableName".equals(temp)) {
+					sb.append(tableName);
+				} else if("className".equals(temp)) {
+					sb.append(className);
+				} else if("keys".equals(temp)) {
+					if(keys == null) {
+						keys = getKeys(tableName);	//主键(多个主键逗号分隔)
+					}
+					sb.append(keys);
+				} else {
+					sb.append(m.group());
+				}
+				
+				begin = m.end();
+			}
 			
-			sb.append('\t')
-				.append("public ")
-				.append(className)
-				.append(" set")
-				.append(upperName)
-				.append("(")
-				.append(col.getType())
-				.append(" ")
-				.append(col.getName())
-				.append(") {\n")
-				.append('\t')
-				.append("\tset(\"")//set("open_id", open_id);
-				.append(col.getName())
-				.append("\", ")
-				.append(col.getName())
-				.append(");\n")
-				.append('\t')
-				.append("\treturn this;\n")//return this;
-				.append('\t')
-				.append("}\n");
-			sb.append('\t')
-				.append("public ")
-				.append(col.getType())
-				.append(" get")
-				.append(upperName)
-				.append("() {\n")
-				.append('\t')
-				.append("\treturn get(\"")
-				.append(col.getName())
-				.append("\");\n")
-				.append('\t')
-				.append("}\n\n");
+			sb.append(line.substring(begin))
+				.append(System.getProperty("line.separator"));	//加入换行符
 		}
-		
-		sb.append("\n}");
 		return sb.toString();
 	}
 	
 	/**
-	 * 通过表名获取所有字段
+	 * 替换#{item.xxx}
 	 * @param tableName
+	 * @param model
 	 * @return
 	 */
-	private List<Col> getColumns(String tableName) {
-		List<Col> cols = new ArrayList<JFinalDBPresenter.Col>();
+	private String replaceItem(String tableName, String model) {
+		StringBuilder sb = new StringBuilder();
+		List<ColumnPojo> cols = helper.columnList(tableName);
 		
-		try {
-			DatabaseMetaData dbmd = conn.getMetaData();
-			ResultSet columnSet = dbmd.getColumns(null, "%", tableName, "%");
-			while (columnSet.next()) {
-				String columnName = columnSet.getString("COLUMN_NAME");
-			    String columnComment = columnSet.getString("REMARKS");
-			    Integer sqlType = columnSet.getInt("DATA_TYPE");
-//			    enResult(columnSet);
-			    Long length = columnSet.getLong("COLUMN_SIZE");
-			    
-			    Col col = new Col(columnName, columnComment);
-//			    System.out.println(sqlType);
-			    switch(sqlType) {
-				    case java.sql.Types.BIGINT:
-				    	col.setType("Long");
-				    	break;
-				    case java.sql.Types.INTEGER:
-				    	col.setType("INTEGER");
-				    	break;
-				    case java.sql.Types.VARCHAR:
-				    	col.setType("String");
-				    	break;
-				    case java.sql.Types.TIMESTAMP:
-				    	col.setType("java.util.Date");	//java.util.Timestamp
-				    	break;
-				    default:
-				    	col.setType(sqlType+"");
-				    	break;
-			    }
-			    cols.add(col);
+		Pattern p_item = Pattern.compile("#\\{item\\.(.+?)\\}");
+		
+		Matcher m = Pattern.compile("<foreach>([\\s\\S]+?)</foreach>").matcher(model);
+		
+		int begin = 0;
+		while(m.find()) {	//需要循环的主体
+			
+			sb.append(model.substring(begin,m.start()));
+			String item = m.group(1);
+			
+			for (ColumnPojo col : cols) {
+				begin = 0;
+				
+				Matcher m1 = p_item.matcher(item);
+				while(m1.find()) {	//需要替换的内容
+					
+					sb.append(item.substring(begin,m1.start()));
+					
+					String temp = m1.group(1);	//class
+//					System.out.println("找到:"+temp);
+					if("class".equals(temp)) {
+						Class<?> clazz = DbHelper.toPojoType(col.getSqlType(), col.getSize());
+						if(ReflectionUtils.inPackage(clazz, "java.lang")) {
+							sb.append(clazz.getSimpleName());
+						} else {
+							sb.append(clazz.getName());
+						}
+						
+					} else if("name".equals(temp)) {
+						sb.append(col.getName());
+					} else if("remark".equals(temp)) {
+						sb.append(col.getRemarks());
+					} else if("nameCamel".equals(temp)) {
+						sb.append(StringUtils.underline2Camel(col.getName(), true));
+					} else if("nameCamelBig".equals(temp)) {
+						sb.append(StringUtils.underline2Camel(col.getName(), false));
+					} else {
+						sb.append(m1.group());
+					}
+					
+					begin = m1.end();
+					
+				}
+				sb.append(item.substring(begin));
+				begin = m.end();
 			}
-//		   System.out.println(JSON.toJSON(cols));
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			mDb.closeDb(conn);
 		}
-		return cols;
+		sb.append(model.substring(begin));	//加入换行符
+		return sb.toString();
 	}
 	
-	static class Col {
-		public String name;
-		public String remark;
-		public String type;
-		public Col(String name, String remark) {
-			this.name = name;
-			this.remark = remark;String a = "{\"data\":{\"siteUrl\":\"www.baidu.com\",\"warningDate\":\"2017-02-03 11:22:33\",\"warningType\":\"预警信息\"},\"openIdList\":[\"oMDXpwLQpNIBE0nZ5Y0a3m9d-JJY\"],\"typeId\":1}";
-			
-		}
-		
-		public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}
-		public String getRemark() {
-			return remark;
-		}
-		public void setRemark(String remark) {
-			this.remark = remark;
-		}
-		public String getType() {
-			return type;
-		}
-		public void setType(String type) {
-			this.type = type;
-		}
-		
+	private String getKeys(String tableName) {
+		List<String> keyList = helper.primaryKeyList(tableName);
+		return ListUtils.toString(keyList, ",");
 	}
+	
+	
+	
 }
