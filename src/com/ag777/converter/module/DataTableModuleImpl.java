@@ -1,10 +1,11 @@
 package com.ag777.converter.module;
 
 import java.util.Iterator;
+
+import com.ag777.util.gson.GsonUtils;
 import com.ag777.util.lang.Formatter;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public class DataTableModuleImpl implements DataTableModuleFactory{
 
@@ -18,8 +19,8 @@ public class DataTableModuleImpl implements DataTableModuleFactory{
 	@Override
 	public String getDataTable(String input, String url) {
 		try{
-			JSONObject jb = JSON.parseObject(input);
-			JSONArray array = jb.getJSONArray("data");
+			JsonObject jb = GsonUtils.toJsonObject(input);
+			JsonArray array = jb.getAsJsonArray("data");
 			
 			StringBuilder sb = new StringBuilder();
 			
@@ -50,7 +51,7 @@ public class DataTableModuleImpl implements DataTableModuleFactory{
 		sb.append("lengthMenu : [ 10,25,50,100 ],");
 	}
 	
-	private static void initTableColumns(JSONArray array, StringBuilder sb) throws Exception{
+	private static void initTableColumns(JsonArray array, StringBuilder sb) throws Exception{
 		try {
 		sb.append("columns:");
 		sb.append("[");
@@ -65,7 +66,7 @@ public class DataTableModuleImpl implements DataTableModuleFactory{
 			sb.append("},");
 		
 		for (int i = 0; i < array.size(); i++) {
-			JSONObject obj = (JSONObject) array.get(i);
+			JsonObject obj = (JsonObject) array.get(i);
 			Iterator<String> iter = obj.keySet().iterator();
 	        while(iter.hasNext()){
 	            String key = iter.next();

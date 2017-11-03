@@ -1,0 +1,16 @@
+import cn.modfun.web.core.annotation.Model;
+
+@Model(table = "#{tableName}", key = "#{keys}")
+public class #{className} extends com.jfinal.plugin.activerecord.Model<#{className}> {
+
+	<foreach>
+		public #{item.class} get#{item.nameCamelBig}() {
+			return get("#{item.name}");
+		}
+		public #{className} set#{item.nameCamelBig}(#{item.class} #{item.nameCamel}) {
+			set("#{item.name}", #{item.nameCamel});
+			return this;
+		}
+	</foreach>
+	
+}
