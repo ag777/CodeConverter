@@ -19,6 +19,10 @@ import com.ag777.converter.view.interf.ConverterView;
 
 public class ConverterPanel extends BasePanel implements ActionListener, ConverterView{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5992818699776536243L;
 	
 	private JButton btn_java;
 	private JButton btn_js;

@@ -19,6 +19,11 @@ import com.ag777.converter.utils.DialogUtils;
 
 public class Menu extends JMenuBar implements ActionListener, BaseContainer{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2431174444645849642L;
+
 	private MainFrame mContainer;
 	
 	private JMenu menu_tool = new JMenu("工具");

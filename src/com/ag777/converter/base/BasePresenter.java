@@ -29,7 +29,12 @@ public class BasePresenter<T extends BaseView> implements Presenter<T>{
 	
 	
 	public static class MvpViewNotAttachedException extends RuntimeException {
-        public MvpViewNotAttachedException() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 3009240321098767728L;
+
+		public MvpViewNotAttachedException() {
             super("请先调用attachView(container)方法绑定视图" +
                     " requesting data to the Presenter");
         }

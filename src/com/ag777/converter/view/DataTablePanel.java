@@ -2,7 +2,6 @@ package com.ag777.converter.view;
 
 import java.awt.BorderLayout;
 import java.awt.ScrollPane;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -26,6 +25,11 @@ import com.ag777.converter.view.interf.ConverterView;
 
 public class DataTablePanel extends BasePanel implements ActionListener, ConverterView {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -647741842623682495L;
+	
 	private JButton btn_start;
 	private JPanel panel_top;
 	private JTextField tf_url;

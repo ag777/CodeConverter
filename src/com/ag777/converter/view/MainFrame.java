@@ -11,7 +11,12 @@ import com.ag777.converter.view.interf.MainView;
 
 public class MainFrame extends JFrame implements MainView,BaseContainer{
 
-	private ConverterPanel converterPanel = new ConverterPanel();
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4686487273039225125L;
+
+//	private ConverterPanel converterPanel = new ConverterPanel();
 	
 	private Container c;		//自身容器
 	private JPanel curPanel;	//当前界面

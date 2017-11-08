@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import com.ag777.util.file.FileUtils;
 import com.ag777.util.file.IniUtils;
+import com.ag777.util.file.PathUtils;
 import com.ag777.util.lang.StringUtils;
 
 public class ConfigUtils {
 	
-	private static String configPath = ResourceUtils.srcPath()+"converter_config.ini";
+	private static String configPath = PathUtils.srcPath()+"converter_config.ini";
 	private static ConfigUtils mInstance = new ConfigUtils("config.ini");
 	
 	
@@ -22,7 +23,7 @@ public class ConfigUtils {
 		try {
 			System.out.println(configPath);
 			if(!FileUtils.fileExists(configPath)) {
-				InputStream in = ResourceUtils.getAsStream(filePath);
+				InputStream in = PathUtils.getAsStream(filePath);
 				com.ag777.util.lang.IOUtils.write(in, new FileOutputStream(new File(configPath)), 1024);
 			}	
 			List<String> lines = FileUtils.readLines(configPath);
