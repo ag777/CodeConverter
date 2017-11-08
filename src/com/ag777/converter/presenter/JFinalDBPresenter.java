@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.ag777.converter.base.BasePresenter;
+import com.ag777.converter.utils.ConfigUtils;
 import com.ag777.converter.utils.lang.IOUtils;
 import com.ag777.converter.view.interf.JfinalDbBuilderView;
 import com.ag777.util.db.DbHelper;
@@ -48,6 +49,14 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 			if(helper != null) {
 				init();
 				this.helper = helper;
+				//保存数据库相关信息
+				ConfigUtils config = ConfigUtils.getInstance();
+				config.beanIp(ip);
+				config.beanPort(port);
+				config.beanDbName(dbName);
+				config.beanUser(userName);
+				config.beanPwd(pwd);
+				
 				return true;
 			}
 		} catch (ClassNotFoundException e) {

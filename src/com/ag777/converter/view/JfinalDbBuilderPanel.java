@@ -10,6 +10,7 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -27,6 +28,7 @@ import com.ag777.converter.base.BasePanel;
 import com.ag777.converter.presenter.JFinalDBPresenter;
 import com.ag777.converter.utils.BorderLayoutHelper;
 import com.ag777.converter.utils.ClipboardUtils;
+import com.ag777.converter.utils.ConfigUtils;
 import com.ag777.converter.utils.DialogUtils;
 import com.ag777.converter.utils.GridBagLayoutHelper;
 import com.ag777.converter.utils.bean.RegexRule;
@@ -188,8 +190,14 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 					
 					
 					if("other".equals(modelName)) {
-//						JFileChooser jfc = new JFileChooser(new File("F:\\temp\\临时"));
-						JFileChooser jfc = new JFileChooser();
+						JFileChooser jfc = null;
+						Optional<String> path = ConfigUtils.getInstance().beanPathTemplateIn();	//模板路径(文件)
+						if(path.isPresent()) {
+							jfc = new JFileChooser(path.get());
+						} else {
+							jfc = new JFileChooser();
+						}
+						
 						jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 						jfc.showDialog(new JLabel(), "选择");
 						
@@ -197,9 +205,11 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 						if(modelFile == null) {
 							return;
 						}
+						ConfigUtils.getInstance().beanPathTemplateIn(modelFile.getParent());
 						mPresenter.build(tableName, clazzName, modelFile);
 					} else {
-						mPresenter.build(tableName, clazzName, getClass().getClassLoader().getResourceAsStream(modelName+".txt"));
+						mPresenter.build(tableName, clazzName, getClass().getClassLoader().getResourceAsStream(
+								"template/"+modelName+".txt"));
 					}
 					
 					
@@ -217,7 +227,14 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 				String clazzName = tf_clazzName.getText().trim();
 				if(!clazzName.isEmpty()) {
 					clazzName = StringUtils.upperCaseFirst(clazzName);	//首字母大写
-					JFileChooser jfc = new JFileChooser(new File("F:\\temp\\临时"));
+					JFileChooser jfc = null;
+					Optional<String> path = ConfigUtils.getInstance().beanPathFileOut();	//文件路径(文件夹)
+					if(path.isPresent()) {
+						jfc = new JFileChooser(path.get());
+					} else {
+						jfc = new JFileChooser();
+					}
+					
 					jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 					jfc.showDialog(new JLabel(), "保存路径");
 					
@@ -225,6 +242,7 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 					if(saveFile == null) {
 						return;
 					}
+					ConfigUtils.getInstance().beanPathFileOut(saveFile.getPath());
 					try {
 						String savePath = StringUtils.concat(saveFile.getPath(),File.separator,clazzName,".java");
 						FileUtils.write(savePath, ta_output.getText(), null, true);
@@ -253,6 +271,7 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 			}
 		});
 		
+		doValidate();	//验证参数并尝试连接数据库(initView方法填入了一些默认配置)
 	}
 	
 	@Override
@@ -273,14 +292,20 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 	 * 填入一些默认值
 	 */
 	public void fillDefault() {
-		tf_ip.setText("127.0.0.1");
-		tf_port.setText("3306");
-		tf_dbName.setText("");
-		tf_userName.setText("root");
-		tf_pwd.setText("");
+		fillTextField(tf_ip, ConfigUtils.getInstance().beanIp());
+		fillTextField(tf_port, ConfigUtils.getInstance().beanPort());
+		fillTextField(tf_dbName, ConfigUtils.getInstance().beanDbName());
+		fillTextField(tf_userName, ConfigUtils.getInstance().beanUser());
+		fillTextField(tf_pwd, ConfigUtils.getInstance().beanPwd());
 		
 		cb_modelName.addItem("model_jfinal_sepcial");
 		cb_modelName.addItem("other");
+	}
+	
+	private void fillTextField(JTextField tf, Optional<String> result) {
+		if(result.isPresent()) {
+			tf.setText(result.get());
+		}
 	}
 	
 	private void initValidate() {

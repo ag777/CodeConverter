@@ -220,7 +220,7 @@ public class IOUtils {
 			int byteCount = 0;
 			byte[] bytes = new byte[buffSize];
 
-			while ((byteCount = in.read(bytes)) != -1) {
+			while ((byteCount = in.read(bytes)) != -1) {System.out.println(123);
 				out.write(bytes, 0, byteCount);
 			}
     		out.flush();
