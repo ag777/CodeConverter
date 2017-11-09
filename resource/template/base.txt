@@ -1,0 +1,18 @@
+
+public class #{className} {
+
+<foreach>
+	public #{item.class} #{item.nameCamel};
+</foreach>
+
+<foreach>
+	public #{item.class} get#{item.nameCamelBig}() {
+		return #{item.nameCamel};
+	}
+	public #{className} set#{item.nameCamelBig}(#{item.class} #{item.nameCamel}) {
+		this.#{item.nameCamel} = #{item.nameCamel};
+		return this;
+	}
+</foreach>
+	
+}

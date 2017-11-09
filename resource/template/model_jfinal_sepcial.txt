@@ -1,10 +1,8 @@
 import cn.modfun.web.core.annotation.Model;
-import cn.modfun.web.core.model.BaseModel;
 
 @Model(table = "#{tableName}", key = "#{keys}")
-public class #{className} extends BaseModel<#{className}> {
+public class #{className} extends com.jfinal.plugin.activerecord.Model<#{className}> {
 
-	public static #{className} dao = new #{className}();
 <foreach>
 	public #{item.class} get#{item.nameCamelBig}() {
 		return get("#{item.name}");
@@ -13,5 +11,6 @@ public class #{className} extends BaseModel<#{className}> {
 		set("#{item.name}", #{item.nameCamel});
 		return this;
 	}
-</foreach>	
+</foreach>
+	
 }

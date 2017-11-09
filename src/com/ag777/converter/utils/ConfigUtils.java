@@ -7,27 +7,27 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import com.ag777.util.file.FileUtils;
-import com.ag777.util.file.IniUtils;
+import com.ag777.util.file.IniHelper;
 import com.ag777.util.file.PathUtils;
 import com.ag777.util.lang.StringUtils;
 
 public class ConfigUtils {
 	
-	private static String configPath = PathUtils.srcPath()+"converter_config.ini";
+	private static String configPath = PathUtils.srcPath(ConfigUtils.class)+"converter_config.ini";
 	private static ConfigUtils mInstance = new ConfigUtils("config.ini");
 	
 	
-	private IniUtils iu;
+	private IniHelper iu;
 	
 	private ConfigUtils(String filePath) {
 		try {
 			System.out.println(configPath);
 			if(!FileUtils.fileExists(configPath)) {
-				InputStream in = PathUtils.getAsStream(filePath);
+				InputStream in = PathUtils.getAsStream(filePath, ConfigUtils.class);
 				com.ag777.util.lang.IOUtils.write(in, new FileOutputStream(new File(configPath)), 1024);
 			}	
 			List<String> lines = FileUtils.readLines(configPath);
-			iu = new IniUtils(lines);
+			iu = new IniHelper(lines);
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
@@ -120,6 +120,18 @@ public class ConfigUtils {
 	
 	public boolean beanPwd(String password) {
 		return update("bean", "pwd", password);
+	}
+	
+	/**
+	 * [数据库转pojo模块]选择的模板
+	 * @return
+	 */
+	public Optional<String> beanTemplate() {
+		return getResult("bean", "template");
+	}
+	
+	public boolean beanTemplate(String template) {
+		return update("bean", "template", template);
 	}
 	
 	

@@ -35,6 +35,7 @@ import com.ag777.converter.utils.bean.RegexRule;
 import com.ag777.converter.view.interf.JfinalDbBuilderView;
 import com.ag777.util.file.FileUtils;
 import com.ag777.util.lang.StringUtils;
+import com.ag777.util.lang.collection.ListUtils;
 
 public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderView{
 
@@ -185,11 +186,11 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 				String clazzName = tf_clazzName.getText().trim();
 				if(!clazzName.isEmpty()) {
 					String tableName = cb_tableName.getSelectedItem().toString();
-					String modelName = cb_modelName.getSelectedItem().toString();
+					String templateName = cb_modelName.getSelectedItem().toString();
 					clazzName = StringUtils.upperCaseFirst(clazzName);	//首字母大写
 					
 					
-					if("other".equals(modelName)) {
+					if("other".equals(templateName)) {
 						JFileChooser jfc = null;
 						Optional<String> path = ConfigUtils.getInstance().beanPathTemplateIn();	//模板路径(文件)
 						if(path.isPresent()) {
@@ -206,10 +207,12 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 							return;
 						}
 						ConfigUtils.getInstance().beanPathTemplateIn(modelFile.getParent());
+						ConfigUtils.getInstance().beanTemplate(templateName);
 						mPresenter.build(tableName, clazzName, modelFile);
 					} else {
+						ConfigUtils.getInstance().beanTemplate(templateName);
 						mPresenter.build(tableName, clazzName, getClass().getClassLoader().getResourceAsStream(
-								"template/"+modelName+".txt"));
+								"template/"+templateName+".txt"));
 					}
 					
 					
@@ -298,9 +301,19 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 		fillTextField(tf_userName, ConfigUtils.getInstance().beanUser());
 		fillTextField(tf_pwd, ConfigUtils.getInstance().beanPwd());
 		
-		cb_modelName.addItem("model_jfinal_sepcial");
+		String[] templates = new String[]{"base", "model_jfinal_sepcial"};
+		for(int i=0; i<templates.length; i++) {
+			cb_modelName.addItem(templates[i]);
+		}
 		cb_modelName.addItem("other");
+		Optional<String> template = ConfigUtils.getInstance().beanTemplate();
+		if(template.isPresent() && ListUtils.inArray(templates, template.get()).isPresent()) {
+			cb_modelName.setSelectedItem(template.get());
+		}
+		
 	}
+	
+	
 	
 	private void fillTextField(JTextField tf, Optional<String> result) {
 		if(result.isPresent()) {

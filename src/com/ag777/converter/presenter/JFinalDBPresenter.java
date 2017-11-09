@@ -165,6 +165,7 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 			
 			sb.append(model.substring(begin,m.start()));
 			String item = m.group(1);
+			item = item.replaceAll("^\\s+?\\r?\\n", "");	//去除前后的换行符
 			
 			for (ColumnPojo col : cols) {
 				begin = 0;
