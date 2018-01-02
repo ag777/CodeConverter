@@ -71,7 +71,7 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 	 * 获取所有表名,先执行init(...)方法来连接数据库
 	 */
 	public List<String> getTbaleList() {
-		return helper.tableList();
+		return helper.tableNameList();
 	}
 	
 	/**
