@@ -8,6 +8,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+
 import com.ag777.converter.base.BasePresenter;
 import com.ag777.converter.utils.ConfigUtils;
 import com.ag777.converter.utils.lang.IOUtils;
@@ -158,16 +163,31 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 		
 		Pattern p_item = Pattern.compile("#\\{item\\.(.+?)\\}");
 		
-		Matcher m = Pattern.compile("<foreach>([\\s\\S]+?)</foreach>").matcher(model);
+		Matcher m = Pattern.compile("<foreach[^>]*>([\\s\\S]+?)</foreach>").matcher(model);
 		
 		int begin = 0;
 		while(m.find()) {	//需要循环的主体
+			/*开始解析xml*/
+			String separator = null;
+			try {
+				Document d = DocumentHelper.parseText(
+					m.group());
+				Element root = d.getRootElement();
+				separator = root.attributeValue("separator");
+			} catch(Exception ex) {
+				ex.printStackTrace();
+			}
+			/*解析xml结束*/
+			
 			
 			sb.append(model.substring(begin,m.start()));
 			String item = m.group(1);
 			item = item.replaceAll("^\\s+?\\r?\\n", "");	//去除前后的换行符
-			
-			for (ColumnPojo col : cols) {
+			/*
+			 * 替换foreach主体中的内容
+			 */
+			for (int i=0; i<cols.size(); i++) {
+				ColumnPojo col = cols.get(i);
 				begin = 0;
 				
 				Matcher m1 = p_item.matcher(item);
@@ -200,11 +220,31 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 					begin = m1.end();
 					
 				}
-				sb.append(item.substring(begin));
+				/*
+				 * 判断并处理剩下部分及分隔符
+				 */
+				String extra = item.substring(begin);
+				if(separator != null && i < (cols.size()-1)) {	//最后一项不加分隔符
+					if(extra.endsWith("\n")) {
+						sb.append(extra.substring(0,extra.length()-1));
+						sb.append(separator);
+						sb.append('\n');
+					} else {
+						sb.append(extra);
+						sb.append(separator);
+					}
+				} else {
+					sb.append(extra);
+				}
+				
 				begin = m.end();
 			}
+
 		}
-		sb.append(model.substring(begin));	//加入换行符
+		/*去除开头的换行符*/
+		String extra = model.substring(begin);
+		extra = extra.replaceFirst("^\r?\n", "");
+		sb.append(extra);	//加入换行符
 		return sb.toString();
 	}
 	

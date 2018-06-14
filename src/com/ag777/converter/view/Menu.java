@@ -16,6 +16,7 @@ import javax.swing.border.TitledBorder;
 
 import com.ag777.converter.base.BaseContainer;
 import com.ag777.converter.utils.DialogUtils;
+import com.ag777.util.lang.collection.MapUtils;
 
 public class Menu extends JMenuBar implements ActionListener, BaseContainer{
 
@@ -106,13 +107,14 @@ public class Menu extends JMenuBar implements ActionListener, BaseContainer{
 	
 	
 	private void showAbout() {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = MapUtils.newLinkedHashMap();
 		
 		map.put("版本", "1.1.0");
-		map.put("编译环境", "JDK 1.6");
+		map.put("发布时间", "2018-06-12");
+		map.put("编译环境", "JDK 1.8");
 		map.put("作者", "王高瞻");
 
-		DialogUtils.showMsgDialog(mContainer, "关于", map, new Dimension(80, 120));
+		DialogUtils.showMsgDialog(mContainer, "关于", map, new Dimension(90, 140));
 	}
 	
 	
