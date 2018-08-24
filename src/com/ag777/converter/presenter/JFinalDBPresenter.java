@@ -50,7 +50,7 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 	public boolean init(String ip, String port, String dbName,
 			String userName, String pwd) {
 		try {
-			DbHelper helper = DbHelper.connectDB(ip, StringUtils.toInteger(port), dbName, userName, pwd);
+			DbHelper helper = DbHelper.connectDB(ip, StringUtils.toInt(port), dbName, userName, pwd);
 			if(helper != null) {
 				init();
 				this.helper = helper;
