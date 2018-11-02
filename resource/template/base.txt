@@ -2,7 +2,11 @@
 public class #{className} {
 
 <foreach>
-	public #{item.class} #{item.nameCamel};
+
+	/**
+	* #{item.remark}
+	*/
+	private #{item.class} #{item.nameCamel};
 </foreach>
 
 <foreach>
