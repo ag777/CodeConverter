@@ -1,4 +1,4 @@
-package com.ag777.converter.utils;
+package com.ag777.converter.utils.ui;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -30,7 +30,7 @@ public class GridBagLayoutHelper {
 		gc = new GridBagConstraints();
 	}
 	
-	public GridBagLayoutHelper addcomponent(Component view, int row, int col){
+	public GridBagLayoutHelper addComponent(Component view, int row, int col){
 		gc.gridx= col;
 		gc.gridy = row;
 		gc.gridwidth = 1;

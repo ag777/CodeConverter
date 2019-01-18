@@ -1,6 +1,6 @@
 package com.ag777.converter;
 
-import com.ag777.converter.utils.ViewUtils;
+import com.ag777.converter.utils.ui.ViewUtils;
 import com.ag777.converter.view.ConverterPanel;
 import com.ag777.converter.view.MainFrame;
 import com.ag777.converter.view.interf.MainView;

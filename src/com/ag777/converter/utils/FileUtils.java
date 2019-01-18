@@ -1,10 +1,16 @@
 package com.ag777.converter.utils;
 
 import java.io.File;
+import java.util.regex.Pattern;
 
 public class FileUtils {
 
 	private FileUtils(){}
+	
+	private static Pattern FilePattern = Pattern.compile("[\\\\/:*?\"<>|\r\n]");
+	public static String filenameFilter(String str) {
+		return str==null?null:FilePattern.matcher(str).replaceAll("");
+	}
 	
 	public static String getJarPath(){
 		// 关键是这行...  
@@ -19,4 +25,5 @@ public class FileUtils {
         }  
         return new File(path).getAbsolutePath();
 	}
+	
 }

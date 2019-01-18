@@ -6,15 +6,17 @@ import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import com.ag777.converter.base.BasePanel;
 import com.ag777.converter.presenter.ConverterPresenter;
 import com.ag777.converter.utils.ClipboardUtils;
-import com.ag777.converter.utils.DialogUtils;
-import com.ag777.converter.utils.GridBagLayoutHelper;
+import com.ag777.converter.utils.ui.DialogUtils;
+import com.ag777.converter.utils.ui.GridBagLayoutHelper;
 import com.ag777.converter.view.interf.ConverterView;
 
 public class ConverterPanel extends BasePanel implements ActionListener, ConverterView{
@@ -48,11 +50,9 @@ public class ConverterPanel extends BasePanel implements ActionListener, Convert
 		//按钮组
 		JPanel panel_btn_group = new JPanel();
 		
-		
 		GridBagLayoutHelper.newInstance(panel_btn_group)
-			.addcomponent(btn_java, 0, 0)
-			.addcomponent(btn_js, 0, 1);
-		
+			.addComponent(btn_java, 0, 0)
+			.addComponent(btn_js, 0, 1);
 		
 		
 		//输入框组
@@ -67,8 +67,8 @@ public class ConverterPanel extends BasePanel implements ActionListener, Convert
 		ta_output.setEditable(false);
 		
 		GridBagLayoutHelper.newInstance(panel_ta_group)
-			.addcomponent(sp_input, 0, 0)
-			.addcomponent(sp_output, 1, 0);
+			.addComponent(sp_input, 0, 0)
+			.addComponent(sp_output, 1, 0);
 		
 		
 		panel_ta_group.setSize(800,800);
@@ -112,7 +112,7 @@ public class ConverterPanel extends BasePanel implements ActionListener, Convert
 	public void showResult(String output) {
 		ta_output.setText(output);
 		ClipboardUtils.setClipbordContents(output);
-		DialogUtils.showMsgDialog(this, "已经复制到剪贴板", "系统提示"); 
+		DialogUtils.showMsgDialog(this, "系统提示", "已经复制到剪贴板"); 
 	}
 
 	@Override

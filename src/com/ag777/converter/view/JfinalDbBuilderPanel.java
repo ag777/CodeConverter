@@ -26,12 +26,12 @@ import javax.swing.event.DocumentListener;
 
 import com.ag777.converter.base.BasePanel;
 import com.ag777.converter.presenter.JFinalDBPresenter;
-import com.ag777.converter.utils.BorderLayoutHelper;
 import com.ag777.converter.utils.ClipboardUtils;
 import com.ag777.converter.utils.ConfigUtils;
-import com.ag777.converter.utils.DialogUtils;
-import com.ag777.converter.utils.GridBagLayoutHelper;
 import com.ag777.converter.utils.bean.RegexRule;
+import com.ag777.converter.utils.ui.BorderLayoutHelper;
+import com.ag777.converter.utils.ui.DialogUtils;
+import com.ag777.converter.utils.ui.GridBagLayoutHelper;
 import com.ag777.converter.view.interf.JfinalDbBuilderView;
 import com.ag777.util.file.FileUtils;
 import com.ag777.util.lang.StringUtils;
@@ -85,8 +85,8 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 
 		
 		GridBagLayoutHelper.newInstance(panel_btn_group)
-			.addcomponent(btn_start, 0, 0)
-			.addcomponent(btn_toFile, 0, 1);
+			.addComponent(btn_start, 0, 0)
+			.addComponent(btn_toFile, 0, 1);
 		btn_start.setEnabled(false);
 		btn_toFile.setEnabled(false);
 		
@@ -139,14 +139,14 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 //		panel_top.add(panel_port);
 //		panel_top.add(panel_dbName);
 		GridBagLayoutHelper.newInstance(panel_top)
-			.addcomponent(panel_ip, 0, 0)
-			.addcomponent(panel_port, 1, 0)
-			.addcomponent(panel_dbName, 2, 0)
-			.addcomponent(panel_userName, 3, 0)
-			.addcomponent(panel_pwd, 4, 0)
-			.addcomponent(panel_clazzName, 5, 0)
-			.addcomponent(panel_modelName, 6, 0)
-			.addcomponent(panel_tableName, 7, 0);
+			.addComponent(panel_ip, 0, 0)
+			.addComponent(panel_port, 1, 0)
+			.addComponent(panel_dbName, 2, 0)
+			.addComponent(panel_userName, 3, 0)
+			.addComponent(panel_pwd, 4, 0)
+			.addComponent(panel_clazzName, 5, 0)
+			.addComponent(panel_modelName, 6, 0)
+			.addComponent(panel_tableName, 7, 0);
 		
 		fillDefault();	//往输入框组填入一些默认值
 		
@@ -158,8 +158,8 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 		ta_output.setEditable(false);
 		
 //		GridBagLayoutHelper.newInstance(panel_ta_group)
-//			.addcomponent(panel_top, 0, 0)
-//			.addcomponent(sp_output, 1, 0);
+//			.addComponent(panel_top, 0, 0)
+//			.addComponent(sp_output, 1, 0);
 		
 		BorderLayoutHelper.newInstance(panel_ta_group)
 			.addComponent(panel_top, BorderLayout.NORTH)
@@ -217,7 +217,7 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 					
 					
 				} else {
-					DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "【类名不能为空】", "系统提示");
+					DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "系统提示", "【类名不能为空】");
 				}
 				
 			}
@@ -248,14 +248,14 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 					ConfigUtils.getInstance().beanPathFileOut(saveFile.getPath());
 					try {
 						String savePath = StringUtils.concat(saveFile.getPath(),File.separator,clazzName,".java");
-						FileUtils.write(savePath, ta_output.getText(), null, true);
-						DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "保存成功", "系统提示");
+						FileUtils.write(savePath, ta_output.getText(), null);
+						DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "系统提示", "保存成功");
 					} catch (IOException e1) {
 						e1.printStackTrace();
-						DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "未知异常", "系统提示");
+						DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "系统提示", "未知异常");
 					}
 				} else {
-					DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "【类名不能为空】", "系统提示");
+					DialogUtils.showMsgDialog(JfinalDbBuilderPanel.this, "系统提示", "【类名不能为空】");
 				}
 				
 			}
@@ -281,7 +281,7 @@ public class JfinalDbBuilderPanel extends BasePanel implements JfinalDbBuilderVi
 	public void showResult(String output) {
 		ta_output.setText(output);
 		ClipboardUtils.setClipbordContents(output);
-		DialogUtils.showMsgDialog(this, "已经复制到剪贴板", "系统提示"); 
+		DialogUtils.showMsgDialog(this, "系统提示", "已经复制到剪贴板"); 
 		btn_toFile.setEnabled(true);
 	}
 	

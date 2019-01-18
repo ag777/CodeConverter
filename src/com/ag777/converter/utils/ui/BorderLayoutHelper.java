@@ -1,4 +1,4 @@
-package com.ag777.converter.utils;
+package com.ag777.converter.utils.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

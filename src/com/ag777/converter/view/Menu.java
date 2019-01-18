@@ -3,7 +3,6 @@ package com.ag777.converter.view;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JMenu;
@@ -15,7 +14,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import com.ag777.converter.base.BaseContainer;
-import com.ag777.converter.utils.DialogUtils;
+import com.ag777.converter.utils.ui.DialogUtils;
 import com.ag777.util.lang.collection.MapUtils;
 
 public class Menu extends JMenuBar implements ActionListener, BaseContainer{
@@ -35,6 +34,7 @@ public class Menu extends JMenuBar implements ActionListener, BaseContainer{
 		private JMenuItem item_module_converter = new JMenuItem("html转换");
 		private JMenuItem item_module_dataTable = new JMenuItem("表单构建");
 		private JMenuItem item_module_jfinaldbbuilder = new JMenuItem("jfinal_bean生成");
+		private JMenuItem item_module_qrcodebuilder = new JMenuItem("二维码生成");
 	
 	public Menu(MainFrame mainFrame) {
 		super();
@@ -53,6 +53,7 @@ public class Menu extends JMenuBar implements ActionListener, BaseContainer{
 			menu_module.add(item_module_converter);
 			menu_module.add(item_module_dataTable);
 			menu_module.add(item_module_jfinaldbbuilder);
+			menu_module.add(item_module_qrcodebuilder);
 		menu_tool.add(menu_module);
 		
 		menu_tool.add(item_help);
@@ -69,6 +70,7 @@ public class Menu extends JMenuBar implements ActionListener, BaseContainer{
 		item_module_converter.addActionListener(this);
 		item_module_dataTable.addActionListener(this);
 		item_module_jfinaldbbuilder.addActionListener(this);
+		item_module_qrcodebuilder.addActionListener(this);
 	}
 	
 	private void showHelp() {
@@ -124,14 +126,16 @@ public class Menu extends JMenuBar implements ActionListener, BaseContainer{
 		
 		if(v.equals(item_help)) {
 			showHelp();
-		}else if(v.equals(item_about)) {
+		} else if(v.equals(item_about)) {
 			showAbout();
-		}else if(v.equals(item_module_converter)) {
+		} else if(v.equals(item_module_converter)) {
 			mContainer.switchView(new ConverterPanel());
-		}else if(v.equals(item_module_dataTable)) {
+		} else if(v.equals(item_module_dataTable)) {
 			mContainer.switchView(new DataTablePanel());
-		}else if(v.equals(item_module_jfinaldbbuilder)) {
+		} else if(v.equals(item_module_jfinaldbbuilder)) {
 			mContainer.switchView(new JfinalDbBuilderPanel());
+		} else if(v.equals(item_module_qrcodebuilder)) {
+			mContainer.switchView(new QrcodePanel());
 		}
 		
 	}

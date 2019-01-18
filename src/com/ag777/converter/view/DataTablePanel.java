@@ -16,11 +16,11 @@ import javax.swing.border.TitledBorder;
 
 import com.ag777.converter.base.BasePanel;
 import com.ag777.converter.presenter.DataTablePresenter;
-import com.ag777.converter.utils.BorderLayoutHelper;
 import com.ag777.converter.utils.ClipboardUtils;
-import com.ag777.converter.utils.DialogUtils;
-import com.ag777.converter.utils.GridBagLayoutHelper;
 import com.ag777.converter.utils.HttpUtils;
+import com.ag777.converter.utils.ui.BorderLayoutHelper;
+import com.ag777.converter.utils.ui.DialogUtils;
+import com.ag777.converter.utils.ui.GridBagLayoutHelper;
 import com.ag777.converter.view.interf.ConverterView;
 
 public class DataTablePanel extends BasePanel implements ActionListener, ConverterView {
@@ -59,7 +59,7 @@ public class DataTablePanel extends BasePanel implements ActionListener, Convert
 
 		
 		GridBagLayoutHelper.newInstance(panel_btn_group)
-			.addcomponent(btn_start, 0, 0);
+			.addComponent(btn_start, 0, 0);
 		
 		//输入框组
 		JPanel panel_ta_group = new JPanel();
@@ -86,8 +86,8 @@ public class DataTablePanel extends BasePanel implements ActionListener, Convert
 		ta_output.setEditable(false);
 		
 		GridBagLayoutHelper.newInstance(panel_ta_group)
-			.addcomponent(panel_top, 0, 0)
-			.addcomponent(sp_output, 1, 0);
+			.addComponent(panel_top, 0, 0)
+			.addComponent(sp_output, 1, 0);
 		
 		
 		panel_ta_group.setSize(800,800);
@@ -119,7 +119,7 @@ public class DataTablePanel extends BasePanel implements ActionListener, Convert
 			String url = tf_url.getText();
 			String result = HttpUtils.doPost(url, new HashMap<String, String>());
 			if(result == null){	//连不上服务端
-				DialogUtils.showMsgDialog(this, "获取JSON失败，请检查url及网络状态!", "系统提示"); 
+				DialogUtils.showMsgDialog(this, "系统提示", "获取JSON失败，请检查url及网络状态!"); 
 			}else {
 				ta_input.setText(result);
 			}	
@@ -132,9 +132,9 @@ public class DataTablePanel extends BasePanel implements ActionListener, Convert
 		if(output!=null){
 			ta_output.setText(output);
 			ClipboardUtils.setClipbordContents(output);
-			DialogUtils.showMsgDialog(this, "已经复制到剪贴板", "系统提示"); 
+			DialogUtils.showMsgDialog(this, "系统提示", "已经复制到剪贴板"); 
 		}else {
-			DialogUtils.showMsgDialog(this, "构筑失败，请检查JSON格式是否正确!", "系统提示"); 
+			DialogUtils.showMsgDialog(this, "系统提示", "构筑失败，请检查JSON格式是否正确!"); 
 		}
 	}
 	
