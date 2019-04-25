@@ -198,7 +198,7 @@ public class JFinalDBPresenter extends BasePresenter<JfinalDbBuilderView> {
 					String temp = m1.group(1);	//class
 //					System.out.println("找到:"+temp);
 					if("class".equals(temp)) {
-						Class<?> clazz = DbHelper.toPojoType(col.getSqlType(), col.getSize());
+						Class<?> clazz = DbHelper.toPojoType(col.getSqlType(), col.getSize(), col.getTypeName());
 						if(ReflectionUtils.inPackage(clazz, "java.lang")) {
 							sb.append(clazz.getSimpleName());
 						} else {
